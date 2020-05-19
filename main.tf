@@ -690,149 +690,142 @@ locals {
     Okit_Lb001Listener_id            = oci_load_balancer_listener.Okit_Lb001Listener.id
 }
 
-# ----Install apache and open port 80
+# # ----Install apache and open port 80
 
-resource "null_resource" "ppWebserver1_ConfigMgmt"{
-  depends_on = [oci_core_instance.Okit_In001]
+# resource "null_resource" "ppWebserver1_ConfigMgmt"{
+#   depends_on = [oci_core_instance.Okit_In001]
 
  
-  provisioner "remote-exec" {
-    connection {
-      type        = "ssh"
-      user        = "opc"
-      host        = local.Okit_In001_public_ip
-      private_key = "${var.ssh_private_key}"
-      script_path = "/home/opc/myssh.sh"
-      agent       = false
-      timeout     = "10m"
-    }
-    inline = ["echo '== 1. Install Oracle instant client'",
-      "sudo -u root yum -y install oracle-release-el7",
-      "sudo -u root yum-config-manager --enable ol7_oracle_instantclient",
-      "sudo -u root yum -y install oracle-instantclient18.3-basic",
+#   provisioner "remote-exec" {
+#     connection {
+#       type        = "ssh"
+#       user        = "opc"
+#       host        = local.Okit_In001_public_ip
+#       private_key = "${var.ssh_private_key}"
+#       script_path = "/home/opc/myssh.sh"
+#       agent       = false
+#       timeout     = "10m"
+#     }
+#     inline = ["echo '== 1. Install Oracle instant client'",
+#       "sudo -u root yum -y install oracle-release-el7",
+#       "sudo -u root yum-config-manager --enable ol7_oracle_instantclient",
+#       "sudo -u root yum -y install oracle-instantclient18.3-basic",
 
-      "echo '== 2. Install Python3, and then with pip3 cx_Oracle and flask'",
-      "sudo -u root yum install -y python36",
-      "sudo -u root pip3 install cx_Oracle",
-      "sudo -u root pip3 install flask",
+#       "echo '== 2. Install Python3, and then with pip3 cx_Oracle and flask'",
+#       "sudo -u root yum install -y python36",
+#       "sudo -u root pip3 install cx_Oracle",
+#       "sudo -u root pip3 install flask",
 
-      "echo '== 3. Disabling firewall and starting HTTPD service'",
-    "echo '== 4. Webservice Install'",
-    "sudo -u root yum install httpd -y",
-    "sudo -u root apachectl start",
-    "sudo -u root systemctl enable httpd",
-    "sudo -u root sudo firewall-cmd --permanent --zone=public --add-port=80/tcp",
-    "sudo -u root sudo firewall-cmd --reload"
-    ]
-  }
-    provisioner "file" {
-      connection {
-      type        = "ssh"
-      user        = "opc"
-      host        = local.Okit_In001_public_ip
-      private_key = "${var.ssh_private_key}"
-      script_path = "/home/opc/myssh.sh"
-      agent       = false
-      timeout     = "10m"
-    }
-    source     = "index.html"
-    destination = "/tmp/index.html"
-  }
-    provisioner "local-exec" {
-    connection {
-      type        = "ssh"
-      user        = "opc"
-      host        = local.Okit_In001_public_ip
-      private_key = "${var.ssh_private_key}"
-      script_path = "/home/opc/myssh.sh"
-      agent       = false
-      timeout     = "10m"
-    }
-    command = "echo ${local.Okit_In001_public_ip} > /tmp/index.html"
-  }
-  }
-  resource "null_resource" "ppWebserver1_File"{
-      depends_on = [null_resource.ppWebserver1_ConfigMgmt]
- provisioner "remote-exec" {
-    connection {
-      type        = "ssh"
-      user        = "opc"
-      host        = local.Okit_In001_public_ip
-      private_key = "${var.ssh_private_key}"
-      script_path = "/home/opc/myssh.sh"
-      agent       = false
-      timeout     = "10m"
-    }
-    inline = ["echo '== 6.finishing file'",
-      "sudo -u root cp /tmp/index.html /var/www/html/"]
-  }
+#       "echo '== 3. Disabling firewall and starting HTTPD service'",
+#     "echo '== 4. Webservice Install'",
+#     "sudo -u root yum install httpd -y",
+#     "sudo -u root apachectl start",
+#     "sudo -u root systemctl enable httpd",
+#     "sudo -u root sudo firewall-cmd --permanent --zone=public --add-port=80/tcp",
+#     "sudo -u root sudo firewall-cmd --reload"
+#     ]
+#   }
+#     provisioner "file" {
+#       connection {
+#       type        = "ssh"
+#       user        = "opc"
+#       host        = local.Okit_In001_public_ip
+#       private_key = "${var.ssh_private_key}"
+#       script_path = "/home/opc/myssh.sh"
+#       agent       = false
+#       timeout     = "10m"
+#     }
+#     source     = "index.html"
+#     destination = "/tmp/index.html"
+#   }
 
-}
+#   }
+#   resource "null_resource" "ppWebserver1_File"{
+#       depends_on = [null_resource.ppWebserver1_ConfigMgmt]
+#  provisioner "remote-exec" {
+#     connection {
+#       type        = "ssh"
+#       user        = "opc"
+#       host        = local.Okit_In001_public_ip
+#       private_key = "${var.ssh_private_key}"
+#       script_path = "/home/opc/myssh.sh"
+#       agent       = false
+#       timeout     = "10m"
+#     }
+#     inline = ["echo '== 6.finishing file'",
+#      "sudo sed -i ${local.Okit_In001_public_ip} > /tmp/index.html",
+#       "sudo -u root cp /tmp/index.html /var/www/html/",
+#       "sudo -u root apachectl start",
+#         "sudo -u root systemctl enable httpd"
+#       ]
+#   }
 
-resource "null_resource" "ppWebserver1_ConfigMgmt2" {
-  depends_on = [oci_core_instance.Okit_In002]
+# }
 
-  provisioner "remote-exec" {
-    connection {
-      type        = "ssh"
-      user        = "opc"
-      host        = local.Okit_In002_public_ip
-      private_key = "${var.ssh_private_key}"
-      script_path = "/home/opc/myssh.sh"
-      agent       = false
-      timeout     = "10m"
-    }
-    inline = ["echo '== 1. Install Oracle instant client'",
-      "sudo -u root yum -y install oracle-release-el7",
-      "sudo -u root yum-config-manager --enable ol7_oracle_instantclient",
-      "sudo -u root yum -y install oracle-instantclient18.3-basic",
+# resource "null_resource" "ppWebserver1_ConfigMgmt2" {
+#   depends_on = [oci_core_instance.Okit_In002]
 
-      "echo '== 2. Install Python3, and then with pip3 cx_Oracle and flask'",
-      "sudo -u root yum install -y python36",
-      "sudo -u root pip3 install cx_Oracle",
-      "sudo -u root pip3 install flask",
+#   provisioner "remote-exec" {
+#     connection {
+#       type        = "ssh"
+#       user        = "opc"
+#       host        = local.Okit_In002_public_ip
+#       private_key = "${var.ssh_private_key}"
+#       script_path = "/home/opc/myssh.sh"
+#       agent       = false
+#       timeout     = "10m"
+#     }
+#     inline = ["echo '== 1. Install Oracle instant client'",
+#       "sudo -u root yum -y install oracle-release-el7",
+#       "sudo -u root yum-config-manager --enable ol7_oracle_instantclient",
+#       "sudo -u root yum -y install oracle-instantclient18.3-basic",
 
-      "echo '== 3. Disabling firewall and starting HTTPD service'",
-    "echo '== 4. Webservice Install'",
-    "sudo -u root yum install httpd -y",
-    "sudo -u root apachectl start",
-    "sudo -u root systemctl enable httpd",
-    "sudo -u root sudo firewall-cmd --permanent --zone=public --add-port=80/tcp",
-    "sudo -u root sudo firewall-cmd --reload"   
-    ]
-  }
-}
+#       "echo '== 2. Install Python3, and then with pip3 cx_Oracle and flask'",
+#       "sudo -u root yum install -y python36",
+#       "sudo -u root pip3 install cx_Oracle",
+#       "sudo -u root pip3 install flask",
 
-resource "null_resource" "ppWebserver1_ConfigMgmt3" {
-  depends_on = [oci_core_instance.Okit_In003]
+#       "echo '== 3. Disabling firewall and starting HTTPD service'",
+#     "echo '== 4. Webservice Install'",
+#     "sudo -u root yum install httpd -y",
+#     "sudo -u root apachectl start",
+#     "sudo -u root systemctl enable httpd",
+#     "sudo -u root sudo firewall-cmd --permanent --zone=public --add-port=80/tcp",
+#     "sudo -u root sudo firewall-cmd --reload"   
+#     ]
+#   }
+# }
 
-  provisioner "remote-exec" {
-    connection {
-      type        = "ssh"
-      user        = "opc"
-      host        = local.Okit_In003_public_ip
-      private_key = "${var.ssh_private_key}"
-      script_path = "/home/opc/myssh.sh"
-      agent       = false
-      timeout     = "10m"
-    }
-    inline = ["echo '== 1. Install Oracle instant client'",
-      "sudo -u root yum -y install oracle-release-el7",
-      "sudo -u root yum-config-manager --enable ol7_oracle_instantclient",
-      "sudo -u root yum -y install oracle-instantclient18.3-basic",
+# resource "null_resource" "ppWebserver1_ConfigMgmt3" {
+#   depends_on = [oci_core_instance.Okit_In003]
 
-      "echo '== 2. Install Python3, and then with pip3 cx_Oracle and flask'",
-      "sudo -u root yum install -y python36",
-      "sudo -u root pip3 install cx_Oracle",
-      "sudo -u root pip3 install flask",
+#   provisioner "remote-exec" {
+#     connection {
+#       type        = "ssh"
+#       user        = "opc"
+#       host        = local.Okit_In003_public_ip
+#       private_key = "${var.ssh_private_key}"
+#       script_path = "/home/opc/myssh.sh"
+#       agent       = false
+#       timeout     = "10m"
+#     }
+#     inline = ["echo '== 1. Install Oracle instant client'",
+#       "sudo -u root yum -y install oracle-release-el7",
+#       "sudo -u root yum-config-manager --enable ol7_oracle_instantclient",
+#       "sudo -u root yum -y install oracle-instantclient18.3-basic",
 
-      "echo '== 3. Disabling firewall and starting HTTPD service'",
-    "echo '== 4. Webservice Install'",
-    "sudo -u root yum install httpd -y",
-    "sudo -u root apachectl start",
-    "sudo -u root systemctl enable httpd",
-    "sudo -u root sudo firewall-cmd --permanent --zone=public --add-port=80/tcp",
-    "sudo -u root sudo firewall-cmd --reload"   
-    ]
-  }
-}
+#       "echo '== 2. Install Python3, and then with pip3 cx_Oracle and flask'",
+#       "sudo -u root yum install -y python36",
+#       "sudo -u root pip3 install cx_Oracle",
+#       "sudo -u root pip3 install flask",
+
+#       "echo '== 3. Disabling firewall and starting HTTPD service'",
+#     "echo '== 4. Webservice Install'",
+#     "sudo -u root yum install httpd -y",
+#     "sudo -u root apachectl start",
+#     "sudo -u root systemctl enable httpd",
+#     "sudo -u root sudo firewall-cmd --permanent --zone=public --add-port=80/tcp",
+#     "sudo -u root sudo firewall-cmd --reload"   
+#     ]
+#   }
+# }
